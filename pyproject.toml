@@ -1,0 +1,19 @@
+[project]
+name = "ppms"
+version = "0.0.1"
+authors = [
+  { name="James Geiger", email="james.geiger@unmc.edu" },
+]
+description = ""
+readme = "README.md"
+requires-python = ">=3.9"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+license = "MIT"
+license-files = ["LICEN[CS]E*"]
+
+[project.urls]
+Homepage = "https://github.com/unmc-vcr/ppms"
+Issues = "https://github.com/unmc-vcr/ppms/issues"
