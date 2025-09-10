@@ -6,12 +6,35 @@ from pydantic import (
     AliasChoices,
     ValidationInfo,
     AliasPath,
-    model_validator
+    model_validator,
+    field_validator
 )
-from typing import List, Optional, Any
+import re
+from typing import List, Optional, Any, ClassVar
 from enum import Enum
+import requests
+import html
+
+class Facility(BaseModel):
+    _OBJECT_TYPE: ClassVar[int] = 1
+
+class System(BaseModel):
+    _OBJECT_TYPE: ClassVar[int] = 2
+
+class Service(BaseModel):
+    _OBJECT_TYPE: ClassVar[int] = 3
+
+class Group(BaseModel):
+    _OBJECT_TYPE: ClassVar[int] = 5
+
+class Affiliation(BaseModel):
+    _OBJECT_TYPE: ClassVar[int] = 6
+
+class Project(BaseModel):
+    _OBJECT_TYPE: ClassVar[int] = 7
 
 class User(BaseModel):
+    _OBJECT_TYPE: ClassVar[int] = 4
     id: int
     name: str
     fullName: str = Field(validation_alias=AliasChoices('fullName', 'label'))
@@ -89,14 +112,27 @@ class PublicationLink(BaseModel):
     name: Optional[str] = None
 
 class CrossrefResponse(BaseModel):
+    _TAGS: ClassVar[List] = ['b', 'i', 'sup', 'sub', 'scp']
     title: str = Field(validation_alias=AliasPath("message", "title", 0))
     journal: str = Field(validation_alias=AliasPath("message", "container-title", 0))
     volume: Optional[str] = Field(validation_alias=AliasPath("message", "volume"), default='')
     yearpub: int = Field(validation_alias=AliasPath("message", "published", "date-parts", 0, 0))
     monthpub: int = Field(validation_alias=AliasPath("message", "published", "date-parts", 0, 1))
 
+    @field_validator('title', 'journal', mode='after')
+    @classmethod
+    def sanitize(cls, value: str) -> str:
+        for pattern in [re.compile(f"</?{tag}>") for tag in cls._TAGS]:
+            value = re.sub(pattern, ' ', value)
+        value = re.sub(r'\n', ' ', value)
+        value = re.sub(r'\s+', ' ', value).strip()
+        value = html.unescape(value)
+        return value
+
+
 class EntrezResponse(BaseModel):
     pubmedid: str = Field(validation_alias=AliasPath("esearchresult", "idlist", 0))
+
 
 class Publication(BaseModel):
     pubid: Optional[int] = Field(validation_alias="id", default = 0)
@@ -119,7 +155,7 @@ class Publication(BaseModel):
     @model_validator(mode='after')
     def get_crossref(self, info: ValidationInfo):
         if (info.context == None) or not (info.context.get('skip_external')):
-            res = req.get(f"https://api.crossref.org/works/{self.doi}")
+            res = requests.get(f"https://api.crossref.org/works/{self.doi}")
             validated = CrossrefResponse.model_validate_json(res.text)
     
             self.title = validated.title
@@ -132,7 +168,7 @@ class Publication(BaseModel):
     @model_validator(mode='after')
     def get_pmid(self, info: ValidationInfo = {}):
         if (info.context == None) or not (info.context.get('skip_external')):
-            res = req.get(f"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?=&db=pubmed&retmode=json&term={self.doi}[doi]")
+            res = requests.get(f"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?=&db=pubmed&retmode=json&term={self.doi}[doi]")
             validated = EntrezResponse.model_validate_json(res.text)
     
             self.pubmedid = validated.pubmedid
