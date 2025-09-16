@@ -166,7 +166,7 @@ class Publication(BaseModel):
         return self
 
     @model_validator(mode='after')
-    def get_pmid(self, info: ValidationInfo = {}):
+    def get_pmid(self, info: ValidationInfo):
         if (info.context == None) or not (info.context.get('skip_external')):
             res = requests.get(f"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?=&db=pubmed&retmode=json&term={self.doi}[doi]")
             validated = EntrezResponse.model_validate_json(res.text)
