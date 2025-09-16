@@ -106,7 +106,7 @@ class PublicationLinkType(str, Enum):
     STAFF = 'U'
 
 class PublicationLink(BaseModel):
-    pubid: Optional[int] = None
+    pubid: Optional[int] = Field(validation_alias="pubId", default=None)
     id: int
     type: PublicationLinkType
     name: Optional[str] = None
