@@ -18,7 +18,7 @@ class Endpoint():
         params = self.preflight_params(action, data)
         if method == 'GET':
             req.params = params
-        elif self.METHOD == 'POST':
+        elif method == 'POST':
             req.data = params
 
         return req.prepare()
