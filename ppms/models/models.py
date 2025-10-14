@@ -144,8 +144,8 @@ class Publication(BaseModel):
     volume: Optional[str] = ''
     pubmedid: Optional[str] = Field(validation_alias="pubMedId", default = None)
     doi: Optional[str] = Field(validation_alias=AliasChoices('DOI', 'doi'), default='')
-    links: Optional[List[PublicationLink]] = Field(exclude=True, default = [])
     validated: Optional[bool] = True
+    links: Optional[List[PublicationLink]] = Field(default = [])
 
     def model_dump(self, **kwargs: Any) -> dict[str, Any]:
         return super().model_dump(by_alias=True, **kwargs)

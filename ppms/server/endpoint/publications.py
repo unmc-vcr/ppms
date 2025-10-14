@@ -31,7 +31,7 @@ class Publications(Endpoint):
         return validated[0]
 
     def set(self, publication: Publication):
-        raw = self.post_request('SetPublication', publication.model_dump())
+        raw = self.post_request('SetPublication', publication.model_dump(exclude=['links']))
         return raw.json()[0]['id']
 
     def set_link(self, publication_link: PublicationLink):
