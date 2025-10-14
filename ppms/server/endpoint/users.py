@@ -28,3 +28,8 @@ class Users(Endpoint):
         if len(validated) != 1:
             raise Exception
         return validated[0]
+    
+    def create(self, user: UserDetail):
+        raw = self.post_request('SetPPMSUser', user.model_dump())
+        
+        pass
