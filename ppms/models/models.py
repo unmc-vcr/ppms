@@ -7,7 +7,8 @@ from pydantic import (
     ValidationInfo,
     AliasPath,
     model_validator,
-    field_validator
+    field_validator,
+    computed_field
 )
 import re
 from typing import List, Optional, Any, ClassVar
@@ -19,20 +20,26 @@ import json
 class Facility(BaseModel):
     _OBJECT_TYPE: ClassVar[int] = 1
 
+
 class System(BaseModel):
     _OBJECT_TYPE: ClassVar[int] = 2
+
 
 class Service(BaseModel):
     _OBJECT_TYPE: ClassVar[int] = 3
 
+
 class Group(BaseModel):
     _OBJECT_TYPE: ClassVar[int] = 5
+
 
 class Affiliation(BaseModel):
     _OBJECT_TYPE: ClassVar[int] = 6
 
+
 class Project(BaseModel):
     _OBJECT_TYPE: ClassVar[int] = 7
+
 
 class User(BaseModel):
     _OBJECT_TYPE: ClassVar[int] = 4
@@ -44,6 +51,7 @@ class User(BaseModel):
     login: str
     active: bool
     ext: bool
+
 
 class UserDetail(User):
     email: str
@@ -99,6 +107,7 @@ class UserDetail(User):
     PubMedQuery: str
     skipOrcidQuestion: bool
 
+
 class PublicationLinkType(str, Enum):
     AUTHOR = 'A'
     GROUP = 'G'
@@ -106,20 +115,36 @@ class PublicationLinkType(str, Enum):
     SERVICE = 'S'
     STAFF = 'U'
 
+
 class PublicationLink(BaseModel):
     pubid: Optional[int] = Field(validation_alias="pubId", default=None)
     id: int
     type: PublicationLinkType
     name: Optional[str] = None
 
+
 class CrossrefResponse(BaseModel):
     _TAGS: ClassVar[List] = ['b', 'i', 'sup', 'sub', 'scp']
     title: str = Field(validation_alias=AliasPath("message", "title", 0))
     journal: str = Field(validation_alias=AliasPath("message", "container-title", 0))
     volume: Optional[str] = Field(validation_alias=AliasPath("message", "volume"), default='')
-    yearpub: int = Field(validation_alias=AliasPath("message", "published", "date-parts", 0, 0))
-    monthpub: int = Field(validation_alias=AliasPath("message", "published", "date-parts", 0, 1))
+    published_date: Optional[list] = Field(default=[], validation_alias=AliasPath("message", "published", "date-parts", 0), exclude=True)
+    indexed_date: Optional[list] = Field(default=[], validation_alias=AliasPath("message", "indexed", "date-parts", 0), exclude=True)
 
+    @computed_field
+    def yearpub(self) -> int:
+        if len(self.published_date) >= 2:
+            return self.published_date[0]
+        else:
+            return self.indexed_date[0]
+        
+    @computed_field
+    def monthpub(self) -> int:
+        if len(self.published_date) >= 2:
+            return self.published_date[1]
+        else:
+            return self.indexed_date[1]
+    
     @field_validator('title', 'journal', mode='after')
     @classmethod
     def sanitize(cls, value: str) -> str:
