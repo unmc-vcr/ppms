@@ -14,6 +14,7 @@ from typing import List, Optional, Any, ClassVar
 from enum import Enum
 import requests
 import html
+import json
 
 class Facility(BaseModel):
     _OBJECT_TYPE: ClassVar[int] = 1
@@ -131,7 +132,7 @@ class CrossrefResponse(BaseModel):
 
 
 class EntrezResponse(BaseModel):
-    pubmedid: str = Field(validation_alias=AliasPath("esearchresult", "idlist", 0))
+    pubmedid: Optional[str] = Field(validation_alias=AliasPath("esearchresult", "idlist", 0), default='')
 
 
 class Publication(BaseModel):
