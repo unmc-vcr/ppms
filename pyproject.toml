@@ -1,6 +1,6 @@
 [project]
 name = "ppms"
-version = "0.0.5"
+version = "0.0.6"
 authors = [
   { name="James Geiger", email="james.geiger@unmc.edu" },
 ]
