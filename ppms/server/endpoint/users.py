@@ -23,7 +23,7 @@ class Users(Endpoint):
         elif id != None and user != None:
             raise Exception
         id = id if id is not None else user.id
-        raw = PPMSGetRequest.send('GetUserDetailsById', {"checkUserId": id, "coreid": 1})
+        raw = self.get_request('GetUserDetailsById', {"checkUserId": id, "coreid": 1})
         validated = self.USER_DETAIL_RESPONSE_VALIDATOR.validate_json(raw.text)
         if len(validated) != 1:
             raise Exception
