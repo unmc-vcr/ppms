@@ -2,9 +2,15 @@ from pydantic import (
     BaseModel,
     Field,
     AliasChoices,
+    BeforeValidator,
     PastDatetime
 )
-from typing import Optional, ClassVar
+from typing import Optional, ClassVar, Annotated, Union
+
+def parse_empty_or_datetime(val: str):
+    return None if val == '' else val
+
+past_datetime_or_none = Annotated[Union[PastDatetime, None], BeforeValidator(parse_empty_or_datetime)]
 
 
 class Group(BaseModel):
@@ -17,6 +23,7 @@ class Group(BaseModel):
     institution: str
     label: Optional[str] = ""
 
+
 class GroupDetail(Group):
     bcode: str
     isBcodePending: bool
@@ -28,7 +35,7 @@ class GroupDetail(Group):
     UserContract: bool
     ContactUserID: int
     MadeByUserID: int
-    MadeDate: PastDatetime
+    MadeDate: past_datetime_or_none = None
     Ext: bool
     ExtType: str
     InvoicingAddress: str
