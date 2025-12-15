@@ -29,6 +29,7 @@ class Server():
             self.users = Users(self)
             self.publications = Publications(self)
             self.tags = Tag(self)
+            self.groups = Groups(self)
     
     @property
     def url(self):

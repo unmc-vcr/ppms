@@ -29,10 +29,6 @@ class Service(BaseModel):
     _OBJECT_TYPE: ClassVar[int] = 3
 
 
-class Group(BaseModel):
-    _OBJECT_TYPE: ClassVar[int] = 5
-
-
 class Affiliation(BaseModel):
     _OBJECT_TYPE: ClassVar[int] = 6
 
