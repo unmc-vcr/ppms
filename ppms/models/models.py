@@ -110,6 +110,7 @@ class PublicationLinkType(str, Enum):
     FACILITY = 'F'
     SERVICE = 'S'
     STAFF = 'U'
+    INSTRUMENT = 'I'
 
 
 class PublicationLink(BaseModel):
